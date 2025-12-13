@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vedic Astrology Birth Chart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background-color: #f1f8e9;
+            /* Milk Green / Light Green 50 */
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+            /* Dark Green */
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input {
+            padding: 0.6rem;
+            width: 100%;
+            border: 1px solid #c8e6c9;
+            /* Light Green border */
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #66bb6a;
+            /* Milk Green / Green 400 */
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #4caf50;
+            /* Green 500 */
+        }
+
+        /* Rasi Chart Styles - Matching Image */
+        .chart-wrapper {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            /* Constrain width to look like the card */
+            margin: 0 auto;
+        }
+
+        .chart-header {
+            color: #333;
+            /* Dark text */
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rasi-chart {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            width: 100%;
+            aspect-ratio: 1;
+            /* Make it square */
+            border: 2px solid #81c784;
+            /* Milk Green Border */
+        }
+
+        .rasi-box {
+            border: 1px solid #fbc02d;
+            /* Darker Yellow/Orange Border */
+            position: relative;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            /* Align content to left */
+            justify-content: flex-start;
+            overflow: hidden;
+            background: #fff9c4;
+            /* Yellow Background */
+            color: #000;
+            /* Black Text */
+        }
+
+        /* Hide the english sign names for clean look, or make them very subtle transparent if needed for debugging */
+        .rasi-box .sign-name {
+            display: none;
+        }
+
+        .rasi-box.ascendant {
+            background-color: #ffe082;
+            /* Darker Yellow/Orange Highlight for Lagna */
+        }
+
+        .lagnam-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            color: #d84315;
+            /* Burnt Orange for contrast */
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .rasi-box .planets {
+            display: flex;
+            flex-direction: column;
+            /* Stack planets vertically */
+            width: 100%;
+            height: 100%;
+            padding: 2px;
+            box-sizing: border-box;
+            gap: 2px;
+        }
+
+        .planet-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            /* Left align text */
+            margin-bottom: 4px;
+            line-height: normal;
+        }
+
+        /* Flex row for Symbol + Name */
+        .planet-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .p-symbol {
+            font-size: 0.9rem;
+            color: #000;
+            /* Black Symbol */
+            font-weight: bold;
+        }
+
+        .p-name {
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #000;
+            /* Black Text */
+        }
+
+        .p-degree {
+            font-size: 0.7rem;
+            color: #000;
+            /* Black Degree */
+            margin-left: 0px;
+            /* Align with name roughly */
+        }
+
+        /* Center Box Styling */
+        .center-box {
+            grid-column: 2 / span 2;
+            grid-row: 2 / span 2;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #388e3c;
+            /* Green Text */
+        }
+
+        .center-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .center-check-details {
+            font-size: 0.8rem;
+            color: #000;
+        }
+
+        /* Specific Grid Positions */
+        .pisces {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .aries {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .taurus {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .gemini {
+            grid-column: 4;
+            grid-row: 1;
+        }
+
+        .aquarius {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .cancer {
+            grid-column: 4;
+            grid-row: 2;
+        }
+
+        .capricorn {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        .leo {
+            grid-column: 4;
+            grid-row: 3;
+        }
+
+        .sagittarius {
+            grid-column: 1;
+            grid-row: 4;
+        }
+
+        .scorpio {
+            grid-column: 2;
+            grid-row: 4;
+        }
+
+        .libra {
+            grid-column: 3;
+            grid-row: 4;
+        }
+
+        .virgo {
+            grid-column: 4;
+            grid-row: 4;
+        }
+
+        #result-json {
+            background: #eee;
+            padding: 1rem;
+            overflow-x: auto;
+            margin-top: 2rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Vedic Astrology Birth Chart</h1>
+
+    <div class="grid">
+        <div class="form-group">
+            <label>Year</label>
+            <input type="number" id="year" value="1990">
+        </div>
+        <div class="form-group">
+            <label>Month</label>
+            <input type="number" id="month" value="5">
+        </div>
+        <div class="form-group">
+            <label>Day</label>
+            <input type="number" id="day" value="15">
+        </div>
+        <div class="form-group">
+            <label>Hour</label>
+            <input type="number" id="hour" value="14">
+        </div>
+        <div class="form-group">
+            <label>Minute</label>
+            <input type="number" id="minute" value="30">
+        </div>
+        <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" id="latitude" step="0.0001" value="13.0827">
+        </div>
+        <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" id="longitude" step="0.0001" value="80.2707">
+        </div>
+        <div class="form-group">
+            <label>Timezone</label>
+            <input type="number" id="timezone" step="0.1" value="5.5">
+        </div>
+    </div>
+
+    <button onclick="calculateChart()">Calculate Horoscope</button>
+
+    <!-- Panchangam Data Display -->
+    <div id="panchangam-display" style="display:none; margin-top:2rem;">
+        <div class="panchangam-grid">
+            <div class="p-card p-yellow" id="p-vara">
+                <div class="p-label">வாரம்</div>
+                <div class="p-value">--</div>
+            </div>
+            <div class="p-card p-orange" id="p-tithi">
+                <div class="p-label">திதி</div>
+                <div class="p-value">--</div>
+            </div>
+            <div class="p-card p-purple" id="p-nakshatra">
+                <div class="p-label">நக்ஷத்திரம்</div>
+                <div class="p-value">--</div>
+            </div>
+            <div class="p-card p-blue" id="p-yoga">
+                <div class="p-label">யோகம்</div>
+                <div class="p-value">--</div>
+            </div>
+            <div class="p-card p-green" id="p-karana">
+                <div class="p-label">கரணம்</div>
+                <div class="p-value">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rasi Chart -->
+    <div id="chart-display" style="display:none; margin-top:2rem;">
+        <div class="chart-wrapper">
+            <div class="chart-header">
+                <span style="color:#9c27b0; font-size:1.5rem;">🕉</span>
+                <span>ராசி கட்டம்</span>
+            </div>
+
+            <div class="rasi-chart" id="rasi-grid">
+                <!-- Grid items created by script or static -->
+                <div class="rasi-box pisces" id="sign-Pisces"><span class="sign-name">Pisces</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box aries" id="sign-Aries"><span class="sign-name">Aries</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box taurus" id="sign-Taurus"><span class="sign-name">Taurus</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box gemini" id="sign-Gemini"><span class="sign-name">Gemini</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box aquarius" id="sign-Aquarius"><span class="sign-name">Aquarius</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="center-box">
+                    <div class="center-title">ராசி</div>
+                    <div class="center-check-details" id="center-details"></div>
+                </div>
+
+                <div class="rasi-box cancer" id="sign-Cancer"><span class="sign-name">Cancer</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box capricorn" id="sign-Capricorn"><span class="sign-name">Capricorn</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box leo" id="sign-Leo"><span class="sign-name">Leo</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box sagittarius" id="sign-Sagittarius"><span class="sign-name">Sagittarius</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box scorpio" id="sign-Scorpio"><span class="sign-name">Scorpio</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box libra" id="sign-Libra"><span class="sign-name">Libra</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box virgo" id="sign-Virgo"><span class="sign-name">Virgo</span>
+                    <div class="planets"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navamsa Chart -->
+        <div class="chart-wrapper" style="margin-top: 2rem;">
+            <div class="chart-header">
+                <span style="color:#fbc02d; font-size:1.5rem;">✨</span>
+                <span>நவாம்சம் கட்டம்</span>
+            </div>
+
+            <div class="rasi-chart" id="navamsa-grid">
+                <!-- Using same IDs with prefix for uniqueness or class based selection -->
+                <div class="rasi-box pisces" id="nav-sign-Pisces"><span class="sign-name">Pisces</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box aries" id="nav-sign-Aries"><span class="sign-name">Aries</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box taurus" id="nav-sign-Taurus"><span class="sign-name">Taurus</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box gemini" id="nav-sign-Gemini"><span class="sign-name">Gemini</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box aquarius" id="nav-sign-Aquarius"><span class="sign-name">Aquarius</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="center-box">
+                    <div class="center-title">அம்சம்</div>
+                    <div class="center-check-details" id="nav-center-details"></div>
+                </div>
+
+                <div class="rasi-box cancer" id="nav-sign-Cancer"><span class="sign-name">Cancer</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box capricorn" id="nav-sign-Capricorn"><span class="sign-name">Capricorn</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box leo" id="nav-sign-Leo"><span class="sign-name">Leo</span>
+                    <div class="planets"></div>
+                </div>
+
+                <div class="rasi-box sagittarius" id="nav-sign-Sagittarius"><span class="sign-name">Sagittarius</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box scorpio" id="nav-sign-Scorpio"><span class="sign-name">Scorpio</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box libra" id="nav-sign-Libra"><span class="sign-name">Libra</span>
+                    <div class="planets"></div>
+                </div>
+                <div class="rasi-box virgo" id="nav-sign-Virgo"><span class="sign-name">Virgo</span>
+                    <div class="planets"></div>
+                </div>
+            </div>
+
+            <!-- Planetary Positions Table -->
+            <div class="table-wrapper"
+                style="margin-top:2rem; background:white; padding:1.5rem; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <div class="chart-header">
+                    <span style="color:#795548; font-size:1.5rem;">🪐</span>
+                    <span>கிரக நிலைகள்</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="planets-table">
+                        <thead>
+                            <tr>
+                                <th>கிரகம்</th>
+                                <th>ராசி</th>
+                                <th>பாகை</th>
+                                <th>பாவம்</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by script -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .panchangam-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 1rem;
+            }
+
+            .p-card {
+                padding: 1rem;
+                border-radius: 8px;
+                text-align: left;
+            }
+
+            .p-label {
+                font-size: 0.8rem;
+                color: #888;
+                /* Muted label color */
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .p-value {
+                font-size: 1rem;
+                font-weight: bold;
+                color: #333;
+            }
+
+            /* Card Colors matching screenshot */
+            .p-yellow {
+                background-color: #fff9c4;
+                border-left: 4px solid #fbc02d;
+            }
+
+            .p-orange {
+                background-color: #ffe0b2;
+                border-left: 4px solid #f57c00;
+            }
+
+            .p-purple {
+                background-color: #ede7f6;
+                border-left: 4px solid #673ab7;
+            }
+
+            .p-blue {
+                background-color: #e3f2fd;
+                border-left: 4px solid #2196f3;
+            }
+
+            .p-green {
+                background-color: #e8f5e9;
+                border-left: 4px solid #43a047;
+            }
+
+            /* Table Styles */
+            #planets-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+
+            #planets-table th,
+            #planets-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+
+            #planets-table th {
+                color: #7f8c8d;
+                font-size: 0.9rem;
+                font-weight: bold;
+            }
+
+            #planets-table td {
+                color: #333;
+                font-size: 0.95rem;
+            }
+
+            .badge-house {
+                background-color: #e3f2fd;
+                color: #1976d2;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 0.85rem;
+                display: inline-block;
+            }
+
+            .planet-name-cell {
+                color: #1565c0;
+                font-weight: bold;
+            }
+        </style>
+
+        <!-- Dasha Section -->
+        <div id="dasha-display"
+            style="display:none; margin-top:2rem; background:white; padding:1.5rem; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+            <div class="chart-header">
+                <span style="color:#ff6f00; font-size:1.5rem;">⏳</span>
+                <span>விம்சோத்தரி தசை</span>
+            </div>
+            <div id="dasha-info"
+                style="background:#f9f9f9; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem;">
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="dasha-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <thead>
+                        <tr style="background:#f0f0f0;">
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">தசை</th>
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">ஆரம்ப ஆண்டு</th>
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">முடிவு ஆண்டு</th>
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">கால அளவு</th>
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">ஆரம்ப தேதி</th>
+                            <th style="padding:12px; text-align:left; border-bottom:1px solid #ddd;">முடிவு தேதி</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3>Raw Response:</h3>
+        <button onclick="document.getElementById('result-json').style.display = 'block'"
+            style="background:#7f8c8d; padding:0.5rem; font-size:0.9rem;">Show JSON</button>
+        <pre id="result-json"></pre>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
