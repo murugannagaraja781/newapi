@@ -68,107 +68,116 @@ const KARANA_NAMES = [
 
 // Dasha Calculation (Vimshottari Dasha - Precise)
 function calculateDasha(positions, birthDate) {
-    const moonLong = positions['Moon'].longitude;
+    try {
+        const moonLong = positions['Moon'].longitude;
 
-    // Nakshatra calculation (27 nakshatras, each 13.333 degrees)
-    const nakshatraSize = 13.333333;
-    const nakshatraIndex = Math.floor(moonLong / nakshatraSize); // 0-26
-    const degreeInNakshatra = moonLong % nakshatraSize;
+        // Nakshatra calculation (27 nakshatras, each 13.333 degrees)
+        const nakshatraSize = 13.333333;
+        const nakshatraIndex = Math.floor(moonLong / nakshatraSize); // 0-26
+        const degreeInNakshatra = moonLong % nakshatraSize;
 
-    // Vimshottari Dasha lords in order (starting from Ashwini)
-    const dashaLords = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
+        // Vimshottari Dasha lords in order (starting from Ashwini)
+        const dashaLords = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
 
-    // Dasha years (total 120 years cycle)
-    const dashaYears = {
-        'Ketu': 7,
-        'Venus': 20,
-        'Sun': 6,
-        'Moon': 10,
-        'Mars': 7,
-        'Rahu': 18,
-        'Jupiter': 16,
-        'Saturn': 19,
-        'Mercury': 17
-    };
+        // Dasha years (total 120 years cycle)
+        const dashaYears = {
+            'Ketu': 7,
+            'Venus': 20,
+            'Sun': 6,
+            'Moon': 10,
+            'Mars': 7,
+            'Rahu': 18,
+            'Jupiter': 16,
+            'Saturn': 19,
+            'Mercury': 17
+        };
 
-    // Starting Dasha lord based on nakshatra
-    const startingDashaIndex = nakshatraIndex % 9;
-    const startingLord = dashaLords[startingDashaIndex];
-    const totalDashaYears = dashaYears[startingLord];
+        // Starting Dasha lord based on nakshatra
+        const startingDashaIndex = nakshatraIndex % 9;
+        const startingLord = dashaLords[startingDashaIndex];
+        const totalDashaYears = dashaYears[startingLord];
 
-    // Calculate remaining years in current dasha (precise calculation)
-    const percentageInNakshatra = degreeInNakshatra / nakshatraSize;
-    const yearsElapsedInDasha = totalDashaYears * percentageInNakshatra;
-    const remainingYearsInDasha = totalDashaYears - yearsElapsedInDasha;
+        // Calculate remaining years in current dasha (precise calculation)
+        const percentageInNakshatra = degreeInNakshatra / nakshatraSize;
+        const yearsElapsedInDasha = totalDashaYears * percentageInNakshatra;
+        const remainingYearsInDasha = totalDashaYears - yearsElapsedInDasha;
 
-    // Build dasha sequence
-    const dashaSequence = [];
-    let currentIndex = startingDashaIndex;
-    let currentDate = new Date(birthDate);
-    let totalYears = 0;
+        // Build dasha sequence
+        const dashaSequence = [];
+        let currentIndex = startingDashaIndex;
+        let currentDate = new Date(birthDate);
+        let totalYears = 0;
 
-    // Add current dasha (remaining portion)
-    dashaSequence.push({
-        lord: startingLord,
-        startYear: 0,
-        endYear: remainingYearsInDasha,
-        startDate: new Date(currentDate),
-        endDate: new Date(currentDate.getTime() + remainingYearsInDasha * 365.25 * 24 * 60 * 60 * 1000),
-        duration: remainingYearsInDasha,
-        isActive: true,
-        elapsedYears: yearsElapsedInDasha
-    });
-
-    // Add next 8 complete dashas
-    currentDate = new Date(currentDate.getTime() + remainingYearsInDasha * 365.25 * 24 * 60 * 60 * 1000);
-    totalYears = remainingYearsInDasha;
-
-    for (let i = 0; i < 8; i++) {
-        currentIndex = (currentIndex + 1) % 9;
-        const lord = dashaLords[currentIndex];
-        const duration = dashaYears[lord];
-
+        // Add current dasha (remaining portion)
         dashaSequence.push({
-            lord: lord,
-            startYear: totalYears,
-            endYear: totalYears + duration,
+            lord: startingLord,
+            startYear: 0,
+            endYear: remainingYearsInDasha,
             startDate: new Date(currentDate),
-            endDate: new Date(currentDate.getTime() + duration * 365.25 * 24 * 60 * 60 * 1000),
-            duration: duration,
-            isActive: false,
-            elapsedYears: 0
+            endDate: new Date(currentDate.getTime() + remainingYearsInDasha * 365.25 * 24 * 60 * 60 * 1000),
+            duration: remainingYearsInDasha,
+            isActive: true,
+            elapsedYears: yearsElapsedInDasha
         });
 
-        currentDate = new Date(currentDate.getTime() + duration * 365.25 * 24 * 60 * 60 * 1000);
-        totalYears += duration;
+        // Add next 8 complete dashas
+        currentDate = new Date(currentDate.getTime() + remainingYearsInDasha * 365.25 * 24 * 60 * 60 * 1000);
+        totalYears = remainingYearsInDasha;
+
+        for (let i = 0; i < 8; i++) {
+            currentIndex = (currentIndex + 1) % 9;
+            const lord = dashaLords[currentIndex];
+            const duration = dashaYears[lord];
+
+            dashaSequence.push({
+                lord: lord,
+                startYear: totalYears,
+                endYear: totalYears + duration,
+                startDate: new Date(currentDate),
+                endDate: new Date(currentDate.getTime() + duration * 365.25 * 24 * 60 * 60 * 1000),
+                duration: duration,
+                isActive: false,
+                elapsedYears: 0
+            });
+
+            currentDate = new Date(currentDate.getTime() + duration * 365.25 * 24 * 60 * 60 * 1000);
+            totalYears += duration;
+        }
+
+        // Get nakshatra name
+        const nakshatraNames = [
+            'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha',
+            'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
+            'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
+        ];
+
+        const nakshatraTamilNames = [
+            'அஸ்வினி', 'பரணி', 'கிருத்திகை', 'ரோஹிணி', 'மிருகசீரிஷம்', 'திருவாதிரை', 'புனர்வசு', 'பூஷ்யம்', 'ஆயில்யம்',
+            'மகம்', 'பூர்வ பல்குனி', 'உத்திர பல்குனி', 'ஹஸ்தம்', 'சித்திரை', 'சுவாதி', 'விசாகம்', 'அனுராதை', 'ஜ்யேஷ்டை',
+            'மூலம்', 'பூர்வாஷாடம்', 'உத்திராஷாடம்', 'திருவோணம்', 'தனிஷ்டை', 'சதயம்', 'பூரட்டாதி', 'உத்திரட்டாதி', 'ரேவதி'
+        ];
+
+        return {
+            system: 'Vimshottari',
+            currentLord: startingLord,
+            currentNakshatra: nakshatraNames[nakshatraIndex] || 'Unknown',
+            currentNakshatraTamil: nakshatraTamilNames[nakshatraIndex] || 'Unknown',
+            moonLongitude: moonLong.toFixed(2),
+            nakshatraIndex: nakshatraIndex,
+            degreeInNakshatra: degreeInNakshatra.toFixed(2),
+            percentageInNakshatra: (percentageInNakshatra * 100).toFixed(2),
+            yearsElapsedInCurrentDasha: yearsElapsedInDasha.toFixed(2),
+            remainingYearsInCurrentDasha: remainingYearsInDasha.toFixed(2),
+            sequence: dashaSequence
+        };
+    } catch (error) {
+        console.error('Error in calculateDasha:', error);
+        return {
+            system: 'Vimshottari',
+            error: error.message,
+            sequence: []
+        };
     }
-
-    // Get nakshatra name
-    const nakshatraNames = [
-        'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha',
-        'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
-        'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
-    ];
-
-    const nakshatraTamilNames = [
-        'அஸ்வினி', 'பரணி', 'கிருத்திகை', 'ரோஹிணி', 'மிருகசீரிஷம்', 'திருவாதிரை', 'புனர்வசு', 'பூஷ்யம்', 'ஆயில்யம்',
-        'மகம்', 'பூர்வ பல்குனி', 'உத்திர பல்குனி', 'ஹஸ்தம்', 'சித்திரை', 'சுவாதி', 'விசாகம்', 'அனுராதை', 'ஜ்யேஷ்டை',
-        'மூலம்', 'பூர்வாஷாடம்', 'உத்திராஷாடம்', 'திருவோணம்', 'தனிஷ்டை', 'சதயம்', 'பூரட்டாதி', 'உத்திரட்டாதி', 'ரேவதி'
-    ];
-
-    return {
-        system: 'Vimshottari',
-        currentLord: startingLord,
-        currentNakshatra: nakshatraNames[nakshatraIndex] || 'Unknown',
-        currentNakshatraTamil: nakshatraTamilNames[nakshatraIndex] || 'Unknown',
-        moonLongitude: moonLong.toFixed(2),
-        nakshatraIndex: nakshatraIndex,
-        degreeInNakshatra: degreeInNakshatra.toFixed(2),
-        percentageInNakshatra: (percentageInNakshatra * 100).toFixed(2),
-        yearsElapsedInCurrentDasha: yearsElapsedInDasha.toFixed(2),
-        remainingYearsInCurrentDasha: remainingYearsInDasha.toFixed(2),
-        sequence: dashaSequence
-    };
 }
 
 function getPanchangam(positions, dateObj) {
@@ -222,8 +231,17 @@ exports.getBirthChart = async (req, res) => {
     try {
         const { year, month, day, hour, minute, latitude, longitude, timezone } = req.body;
 
-        if (!year || !month || !day) {
-            return res.status(400).json({ error: "Invalid Input: Date fields are required" });
+        // Validate required fields
+        if (!year || !month || !day || hour === undefined || minute === undefined || latitude === undefined || longitude === undefined || !timezone) {
+            return res.status(400).json({ error: "Invalid Input: All birth details (year, month, day, hour, minute, latitude, longitude, timezone) are required" });
+        }
+
+        // Validate coordinate ranges
+        if (latitude < -90 || latitude > 90) {
+            return res.status(400).json({ error: "Invalid latitude: must be between -90 and 90" });
+        }
+        if (longitude < -180 || longitude > 180) {
+            return res.status(400).json({ error: "Invalid longitude: must be between -180 and 180" });
         }
 
         const birthDate = CommonUtils.createDate(year, month, day, hour, minute, timezone);
